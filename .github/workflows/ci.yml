@@ -28,7 +28,7 @@ jobs:
         run: swift --version
 
       - name: Cache Swift packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .build
           key: ${{ runner.os }}-spm-${{ hashFiles('Package.swift') }}
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Cache Swift packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .build
           key: ${{ runner.os }}-spm-${{ hashFiles('Package.swift') }}
@@ -71,7 +71,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Cache Swift packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .build
           key: ${{ runner.os }}-swift60-spm-${{ hashFiles('Package.swift') }}
