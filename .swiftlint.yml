@@ -1,50 +1,8 @@
+# SwiftLint configuration for swift-file-system
+# Inherits from the shared parent configuration in swift-standards
+
+parent_config: https://raw.githubusercontent.com/swift-standards/swift-standards/main/.swiftlint.yml
+
+# Package-specific overrides
 disabled_rules:
-  - line_length
-  - identifier_name
-  - nesting
-  - redundant_discardable_let  # Preserve 'let _ =' in result builder contexts (required for Swift 6.0+)
-  - force_unwrapping  # Common in tests
-  - force_try  # Common in tests
-  - strict_fileprivate  # Allowed in tests
-  - file_length  # Tests can be long
-  - type_body_length  # Test types can be long
-  - empty_string  # Sometimes == "" is clearer than isEmpty
-
-opt_in_rules:
-  - empty_count
-  - explicit_init
-  - sorted_imports
-  - force_cast
-  - closure_spacing
-  - operator_usage_whitespace
-  - private_outlet
-  - redundant_nil_coalescing
-  - explicit_enum_raw_value
-  - literal_expression_end_indentation
-  - single_test_class
-  - sorted_first_last
-  - vertical_whitespace
-  - legacy_random
-  - no_extension_access_modifier
-  - colon
-  - trailing_comma
-  
-included:
-  - Package.swift
-  - Sources
-  - Tests
-
-excluded:
-  - Carthage
-  - Pods
-  - fastlane
-  - build
-
-analyzer_rules:
-  - unused_import
-
-colon:
-  apply_to_dictionaries: true
-
-vertical_whitespace:
-  max_empty_lines: 1
+  - function_parameter_count

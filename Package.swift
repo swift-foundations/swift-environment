@@ -1,56 +1,68 @@
-// swift-tools-version:6.0
+// swift-tools-version: 6.3.1
 
-import Foundation
+// ===----------------------------------------------------------------------===//
+//
+// This source file is part of the swift-environment open source project
+//
+// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-environment project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE for license information
+//
+// ===----------------------------------------------------------------------===//
+
 import PackageDescription
 
-extension String {
-    static let envVars: Self = "EnvVars"
-    static let environmentVariables: Self = "EnvironmentVariables"
-}
-
-extension Target.Dependency {
-    static var environmentVariables: Self { .target(name: .environmentVariables) }
-}
-
-extension Target.Dependency {
-    static var dependencies: Self { .product(name: "Dependencies", package: "swift-dependencies") }
-    static var dependenciesMacros: Self { .product(name: "DependenciesMacros", package: "swift-dependencies") }
-    static var dependenciesTestSupport: Self { .product(name: "DependenciesTestSupport", package: "swift-dependencies") }
-    static var logging: Self { .product(name: "Logging", package: "swift-log") }
-}
-
 let package = Package(
-    name: "swift-environment-variables",
+    name: "swift-environment",
     platforms: [
-      .iOS(.v13),
-      .macOS(.v10_15),
-      .tvOS(.v13),
-      .watchOS(.v6)
+        .macOS(.v26),
+        .iOS(.v26),
+        .tvOS(.v26),
+        .watchOS(.v26),
+        .visionOS(.v26)
     ],
     products: [
-        .library(name: .envVars, targets: [.environmentVariables]),
-        .library(name: .environmentVariables, targets: [.environmentVariables])
+        .library(name: "Environment", targets: ["Environment"])
     ],
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-dependencies", branch: "main"),
-        .package(url: "https://github.com/apple/swift-log", from: "1.6.4")
+        .package(url: "https://github.com/swift-foundations/swift-kernel.git", branch: "main"),
+        .package(url: "https://github.com/swift-foundations/swift-strings.git", branch: "main")
     ],
     targets: [
         .target(
-            name: .environmentVariables,
+            name: "Environment",
             dependencies: [
-                .dependencies,
-                .logging
-            ]
+                .product(name: "Kernel", package: "swift-kernel"),
+                .product(name: "Strings", package: "swift-strings")
+            ],
+            path: "Sources/Environment"
         ),
         .testTarget(
-            name: .environmentVariables.tests,
+            name: "Environment Tests",
             dependencies: [
-                .environmentVariables,
-                .dependenciesTestSupport
+                "Environment",
             ]
-        )
+        ),
     ]
 )
 
-extension String { var tests: Self { self + " Tests" } }
+
+for target in package.targets where ![.system, .binary, .plugin, .macro].contains(target.type) {
+    let ecosystem: [SwiftSetting] = [
+        .strictMemorySafety(),
+        .enableUpcomingFeature("ExistentialAny"),
+        .enableUpcomingFeature("InternalImportsByDefault"),
+        .enableUpcomingFeature("MemberImportVisibility"),
+        .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+        .enableExperimentalFeature("LifetimeDependence"),
+        .enableExperimentalFeature("Lifetimes"),
+        .enableExperimentalFeature("SuppressedAssociatedTypes"),
+        .enableUpcomingFeature("InferIsolatedConformances"),
+        .enableUpcomingFeature("LifetimeDependence"),
+    ]
+
+    let package: [SwiftSetting] = []
+
+    target.swiftSettings = (target.swiftSettings ?? []) + ecosystem + package
+}
