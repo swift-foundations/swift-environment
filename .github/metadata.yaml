@@ -1,6 +1,6 @@
 # .github/metadata.yaml
 # Triaged by AI-assisted bulk pass (2026-04-29).
-description: "Environment for Swift."
+description: "Thread-safe process environment variable access with task-local overlays for Swift."
 topics:
   - foundations
   - environment
