@@ -128,13 +128,16 @@ extension Environment {
         // Result-wrapping workaround: stdlib's TaskLocal.withValue rethrows erases
         // typed error info. When FullTypedThrows (AvailableInProd) lands, replace
         // with: try await $overlay.withValue(Snapshot(values), operation: body)
-        let result: Result<R, E> = await $overlay.withValue(Snapshot(values), operation: {
-            do throws(E) {
-                return .success(try await body())
-            } catch {
-                return .failure(error)
+        let result: Result<R, E> = await $overlay.withValue(
+            Snapshot(values),
+            operation: {
+                do throws(E) {
+                    return .success(try await body())
+                } catch {
+                    return .failure(error)
+                }
             }
-        })
+        )
         return try result.get()
     }
 
@@ -151,13 +154,16 @@ extension Environment {
         // Result-wrapping workaround: stdlib's TaskLocal.withValue rethrows erases
         // typed error info. When FullTypedThrows (AvailableInProd) lands, replace
         // with: try $overlay.withValue(Snapshot(values), operation: body)
-        let result: Result<R, E> = $overlay.withValue(Snapshot(values), operation: {
-            do throws(E) {
-                return .success(try body())
-            } catch {
-                return .failure(error)
+        let result: Result<R, E> = $overlay.withValue(
+            Snapshot(values),
+            operation: {
+                do throws(E) {
+                    return .success(try body())
+                } catch {
+                    return .failure(error)
+                }
             }
-        })
+        )
         return try result.get()
     }
 }

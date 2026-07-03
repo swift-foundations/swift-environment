@@ -9,8 +9,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Testing
 import Environment
+import Testing
 
 @Suite("Environment Tests")
 struct EnvironmentTests {

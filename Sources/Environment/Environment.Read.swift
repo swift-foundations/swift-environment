@@ -49,11 +49,11 @@ extension Environment.Read {
         Environment.lock.withLock { _ in
             var result: [Swift.String: Swift.String] = [:]
             #if os(Windows)
-            guard var entries = Kernel.Environment.entries() else {
-                return result
-            }
+                guard var entries = Kernel.Environment.entries() else {
+                    return result
+                }
             #else
-            var entries = Kernel.Environment.entries()
+                var entries = Kernel.Environment.entries()
             #endif
             while let entry = entries.next() {
                 let name = try! Swift.String(entry.name)
