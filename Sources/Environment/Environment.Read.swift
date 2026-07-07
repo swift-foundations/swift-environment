@@ -56,8 +56,12 @@ extension Environment.Read {
                 var entries = Kernel.Environment.entries()
             #endif
             while let entry = entries.next() {
+                // OS process-environment bytes are treated as valid UTF-8 by contract;
+                // skipping malformed entries would change behavior (crash vs. silent drop).
+                // swiftlint:disable force_try
                 let name = try! Swift.String(entry.name)
                 let value = try! Swift.String(entry.value)
+                // swiftlint:enable force_try
                 result[name] = value
             }
             return result

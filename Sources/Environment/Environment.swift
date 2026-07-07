@@ -29,7 +29,7 @@ public import Synchronization
 /// 1. `Environment.read` and `Environment.write` always operate on the real process environment.
 /// 2. TaskLocal overlays are only visible through `Environment.task.*` APIs.
 /// 3. Spawned child processes see the real process environment unless you explicitly
-///    pass a snapshot (e.g., via `.effective()` to include TaskLocal overlay).
+///    pass a snapshot, such as via `.effective()` to include TaskLocal overlay.
 public enum Environment {
     /// Process-global lock for environment access.
     @usableFromInline
