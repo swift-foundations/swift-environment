@@ -30,7 +30,9 @@ public import Synchronization
 /// 2. TaskLocal overlays are only visible through `Environment.task.*` APIs.
 /// 3. Spawned child processes see the real process environment unless you explicitly
 ///    pass a snapshot, such as via `.effective()` to include TaskLocal overlay.
-public enum Environment {
+public enum Environment {}
+
+extension Environment {
     /// Process-global lock for environment access.
     @usableFromInline
     internal static let lock = Mutex<Void>(())
