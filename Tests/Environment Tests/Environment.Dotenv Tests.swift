@@ -129,6 +129,53 @@ extension Environment.Dotenv {
         }
 
         @Test
+        func `Key admits interior hyphens`() throws {
+            // Real-world externally-imposed keys this grammar must accept —
+            // notably Apple's literal `apple-developer-merchantid-domain-association`
+            // naming (uppercased here per this project's env-var convention).
+            let dotenv = try Environment.Dotenv(
+                parsing: """
+                    LOCAL-SSL-SERVER-CRT=cert_content
+                    LOCAL-SSL-SERVER-KEY=key_content
+                    APPLE-DEVELOPER-MERCHANTID-DOMAIN-ASSOCIATION=association_content
+                    """
+            )
+            #expect(dotenv.values["LOCAL-SSL-SERVER-CRT"] == "cert_content")
+            #expect(dotenv.values["LOCAL-SSL-SERVER-KEY"] == "key_content")
+            #expect(
+                dotenv.values["APPLE-DEVELOPER-MERCHANTID-DOMAIN-ASSOCIATION"]
+                    == "association_content"
+            )
+            #expect(dotenv.values.count == 3)
+        }
+
+        @Test
+        func `A leading hyphen still throws invalidKey`() {
+            do {
+                _ = try Environment.Dotenv(parsing: "-FOO=bar\n")
+                Issue.record("Expected Environment.Dotenv.Error.invalidKey")
+            } catch let error as Environment.Dotenv.Error {
+                #expect(error == .invalidKey(line: 1))
+            } catch {
+                Issue.record("Unexpected error: \(error)")
+            }
+        }
+
+        @Test
+        func `A truly malformed line still aborts the parse despite hyphen support`() {
+            // Retention case: admitting interior hyphens must not loosen the parser
+            // into accepting arbitrary punctuation — the loader stays strict.
+            do {
+                _ = try Environment.Dotenv(parsing: "FOO!BAR=baz\n")
+                Issue.record("Expected Environment.Dotenv.Error.missingSeparator")
+            } catch let error as Environment.Dotenv.Error {
+                #expect(error == .missingSeparator(line: 1))
+            } catch {
+                Issue.record("Unexpected error: \(error)")
+            }
+        }
+
+        @Test
         func `Missing separator throws missingSeparator with the offending line`() {
             do {
                 _ = try Environment.Dotenv(parsing: "FOO bar\n")

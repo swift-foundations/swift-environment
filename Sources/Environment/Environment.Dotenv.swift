@@ -48,7 +48,16 @@ extension Environment.Dotenv {
     ///   skipped.
     /// - An optional literal `export` followed by whitespace, before the key, is
     ///   skipped.
-    /// - A key matches `[A-Za-z_][A-Za-z0-9_.]*`, with surrounding whitespace trimmed.
+    /// - A key matches `[A-Za-z_][A-Za-z0-9_.-]*`, with surrounding whitespace trimmed.
+    ///   Interior hyphens are admitted (but a hyphen may not start a key) because at
+    ///   least one legacy key is externally imposed — Apple's own dotenv-style naming
+    ///   for `apple-developer-merchantid-domain-association` uses hyphens literally,
+    ///   and this parser has to accept it as-is rather than rewrite it. Note for
+    ///   POSIX-export consumers: a dotenv **file** is not a shell — `export` and
+    ///   direct assignment of a hyphenated identifier are not valid POSIX shell
+    ///   syntax, so code that re-exports these key/value pairs into a POSIX
+    ///   environment (e.g. via `export $(cat .env)` or similar) must map hyphenated
+    ///   keys to a shell-legal form itself; this parser does not do that mapping.
     /// - Everything up to (and including skipping) the `=` separator, and the value
     ///   that follows, is then read:
     ///   - Leading whitespace before the value is trimmed.
@@ -78,6 +87,7 @@ extension Environment.Dotenv {
         // `init(ascii: Unicode.Scalar)` ambiguous for a string-literal argument.
         let asciiUnderscore: Swift.UInt8 = 0x5F  // '_'
         let asciiDot: Swift.UInt8 = 0x2E  // '.'
+        let asciiHyphen: Swift.UInt8 = 0x2D  // '-'
         let asciiSpace: Swift.UInt8 = 0x20  // ' '
         let asciiTab: Swift.UInt8 = 0x09  // '\t'
         let asciiHash: Swift.UInt8 = 0x23  // '#'
@@ -129,6 +139,7 @@ extension Environment.Dotenv {
 
         func isKeyContinuation(_ byte: Swift.UInt8) -> Swift.Bool {
             isAlpha(byte) || isDigit(byte) || byte == asciiUnderscore || byte == asciiDot
+                || byte == asciiHyphen
         }
 
         func skipSpacesAndTabs() {

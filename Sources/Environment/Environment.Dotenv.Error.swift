@@ -19,10 +19,12 @@ extension Environment.Dotenv {
     /// after CRLF normalization).
     public enum Error: Swift.Error, Sendable, Equatable, Hashable {
         /// The line did not begin with a well-formed key — a run of
-        /// `[A-Za-z_][A-Za-z0-9_.]*` starting with a letter or underscore, read
+        /// `[A-Za-z_][A-Za-z0-9_.-]*` starting with a letter or underscore, read
         /// after skipping the optional `export ` prefix. Covers both an empty key
         /// (nothing at all before `=`, end of line, or non-key-start byte) and a
-        /// first byte outside the permitted key-start set.
+        /// first byte outside the permitted key-start set. Interior hyphens are
+        /// permitted, but a hyphen is not a valid key-start byte — a key may not
+        /// begin with `-`.
         case invalidKey(line: Swift.Int)
 
         /// A non-blank, non-comment line contained a key but no `=` separator
