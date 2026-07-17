@@ -13,7 +13,7 @@ import Environment
 import Testing
 
 extension Environment {
-    @Suite("Environment Tests")
+    @Suite
     struct Test {
         @Test
         func `Read existing PATH variable`() {

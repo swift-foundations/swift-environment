@@ -13,7 +13,7 @@ import Environment
 import Testing
 
 extension Environment.Dotenv {
-    @Suite("Environment.Dotenv Tests")
+    @Suite
     struct Test {
         @Test
         func `Parses basic key-value pairs`() throws {
