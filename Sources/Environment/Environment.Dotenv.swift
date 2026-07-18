@@ -151,7 +151,7 @@ extension Environment.Dotenv {
         // Matches the literal `export` only when followed by whitespace, so a key
         // that merely starts with "export" (e.g. `exportFOO=bar`) is left untouched.
         func consumeExportPrefixIfPresent() {
-            let word: [Swift.UInt8] = [0x65, 0x78, 0x70, 0x6F, 0x72, 0x74] // "export"
+            let word: [Swift.UInt8] = [0x65, 0x78, 0x70, 0x6F, 0x72, 0x74]  // "export"
             guard index + word.count < count else { return }
             for offset in 0..<word.count where bytes[index + offset] != word[offset] {
                 return
@@ -219,6 +219,7 @@ extension Environment.Dotenv {
                         index += 1
                         closed = true
                         break quoted
+
                     case 0x5C:  // '\' — escape introducer
                         index += 1
                         guard index < count else {
@@ -230,14 +231,17 @@ extension Environment.Dotenv {
                         case 0x74: valueBytes.append(asciiTab)  // 't' -> \t
                         case 0x5C: valueBytes.append(asciiBackslash)  // '\' -> \
                         case 0x22: valueBytes.append(asciiDoubleQuote)  // '"' -> "
+
                         default:
                             throw .invalidEscape(line: line)
                         }
                         index += 1
+
                     case 0x0A:  // '\n' — literal newline kept in a multiline value
                         line += 1
                         valueBytes.append(asciiNewline)
                         index += 1
+
                     default:
                         valueBytes.append(bytes[index])
                         index += 1

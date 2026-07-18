@@ -106,7 +106,7 @@ extension Environment.Dotenv {
         @Test
         func `Allows an empty unquoted value`() throws {
             let dotenv = try Environment.Dotenv(parsing: "FOO=\n")
-            #expect(dotenv.values["FOO"] == "")
+            #expect(dotenv.values["FOO"]?.isEmpty == true)
         }
 
         @Test

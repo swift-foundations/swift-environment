@@ -55,6 +55,25 @@ extension Environment {
         }
 
         @Test
+        func `Snapshot typed accessors`() {
+            let snapshot = Environment.Snapshot([
+                "TEXT": "value",
+                "NUMBER": "42",
+                "TRUE": "YeS",
+                "FALSE": "off",
+                "URL": "https://example.com",
+            ])
+
+            #expect(snapshot.string("TEXT") == "value")
+            #expect(snapshot.int("NUMBER") == 42)
+            #expect(snapshot.bool("TRUE") == true)
+            #expect(snapshot.bool("FALSE") == false)
+            #expect(snapshot.url("URL") == "https://example.com")
+            #expect(snapshot.int("TEXT") == nil)
+            #expect(snapshot.bool("TEXT") == nil)
+        }
+
+        @Test
         func `TaskLocal overlay`() async throws {
             let testName = "__TEST_OVERLAY_VAR__"
 
