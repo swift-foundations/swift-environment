@@ -45,6 +45,13 @@ extension Environment.Read {
     ///
     /// - Note: On Windows, internal pseudo-variables (entries starting with `=`)
     ///   are excluded automatically at the kernel level.
+    /// - Note: Decoding policy: entries are decoded as UTF-8 **lossily** — any byte
+    ///   sequence that is not valid UTF-8 is replaced with U+FFFD (REPLACEMENT
+    ///   CHARACTER) rather than throwing or trapping. This matches
+    ///   ``callAsFunction(_:)``, which already decodes the process environment
+    ///   losslessly via a non-throwing path. `all()` is therefore total: it never
+    ///   traps the process, even when the real OS environment contains
+    ///   non-UTF8 bytes (which POSIX permits).
     public func all() -> [Swift.String: Swift.String] {
         Environment.lock.withLock { _ in
             var result: [Swift.String: Swift.String] = [:]
@@ -56,12 +63,14 @@ extension Environment.Read {
                 var entries = Kernel.Environment.entries()
             #endif
             while let entry = entries.next() {
-                // OS process-environment bytes are treated as valid UTF-8 by contract;
-                // skipping malformed entries would change behavior (crash vs. silent drop).
-                // swiftlint:disable force_try
-                let name = try! Swift.String(entry.name)
-                let value = try! Swift.String(entry.value)
-                // swiftlint:enable force_try
+                // Lossy decode: malformed UTF-8 becomes U+FFFD instead of trapping
+                // the process (see doc note above).
+                let name = unsafe entry.name.withUnsafeBufferPointer { buffer in
+                    unsafe Swift.String(decoding: buffer, as: Swift.UTF8.self)
+                }
+                let value = unsafe entry.value.withUnsafeBufferPointer { buffer in
+                    unsafe Swift.String(decoding: buffer, as: Swift.UTF8.self)
+                }
                 result[name] = value
             }
             return result
