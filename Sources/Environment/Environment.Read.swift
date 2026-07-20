@@ -49,7 +49,7 @@ extension Environment.Read {
     ///   sequence that is not valid UTF-8 is replaced with U+FFFD (REPLACEMENT
     ///   CHARACTER) rather than throwing or trapping. This matches
     ///   ``callAsFunction(_:)``, which already decodes the process environment
-    ///   losslessly via a non-throwing path. `all()` is therefore total: it never
+    ///   lossily via a non-throwing path. `all()` is therefore total: it never
     ///   traps the process, even when the real OS environment contains
     ///   non-UTF8 bytes (which POSIX permits).
     public func all() -> [Swift.String: Swift.String] {
