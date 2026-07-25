@@ -45,13 +45,14 @@ extension Environment.Read {
     ///
     /// - Note: On Windows, internal pseudo-variables (entries starting with `=`)
     ///   are excluded automatically at the kernel level.
-    /// - Note: Decoding policy: entries are decoded as UTF-8 **lossily** — any byte
-    ///   sequence that is not valid UTF-8 is replaced with U+FFFD (REPLACEMENT
-    ///   CHARACTER) rather than throwing or trapping. This matches
-    ///   ``callAsFunction(_:)``, which already decodes the process environment
-    ///   lossily via a non-throwing path. `all()` is therefore total: it never
-    ///   traps the process, even when the real OS environment contains
-    ///   non-UTF8 bytes (which POSIX permits).
+    /// - Note: Decoding policy: entries are decoded from the platform-native
+    ///   encoding **lossily** — UTF-8 on POSIX, UTF-16 on Windows — so any code
+    ///   unit sequence that is not valid in that encoding is replaced with
+    ///   U+FFFD (REPLACEMENT CHARACTER) rather than throwing or trapping. This
+    ///   matches ``callAsFunction(_:)``, which already decodes the process
+    ///   environment lossily via a non-throwing path. `all()` is therefore
+    ///   total: it never traps the process, even when the real OS environment
+    ///   contains malformed code units (which POSIX permits).
     public func all() -> [Swift.String: Swift.String] {
         Environment.lock.withLock { _ in
             var result: [Swift.String: Swift.String] = [:]
@@ -63,14 +64,8 @@ extension Environment.Read {
                 var entries = Kernel.Environment.entries()
             #endif
             while let entry = entries.next() {
-                // Lossy decode: malformed UTF-8 becomes U+FFFD instead of trapping
-                // the process (see doc note above).
-                let name = unsafe entry.name.withUnsafeBufferPointer { buffer in
-                    unsafe Swift.String(decoding: buffer, as: Swift.UTF8.self)
-                }
-                let value = unsafe entry.value.withUnsafeBufferPointer { buffer in
-                    unsafe Swift.String(decoding: buffer, as: Swift.UTF8.self)
-                }
+                let name = Self.lossyDecoded(entry.name)
+                let value = Self.lossyDecoded(entry.value)
                 result[name] = value
             }
             return result
@@ -86,4 +81,45 @@ extension Environment.Read {
             unsafe (Kernel.Environment.get(name) != nil)
         }
     }
+}
+
+// MARK: - Entry decoding
+
+// The only platform-conditional surface in this file besides the optionality of
+// `Kernel.Environment.entries()`. The kernel vends an entry's name and value in
+// the borrowed shape native to the platform's environment block — a
+// `Swift.Span` over the `environ` bytes on POSIX, a null-terminated
+// `String.Borrowed` view over `GetEnvironmentStringsW`'s UTF-16 units on
+// Windows — so the two legs differ in *shape*, not in policy. Both hand the
+// code units to `Swift.String.lossy(platformNative:)`, which owns the choice of
+// codec, keeping the decoding policy itself unconditional.
+
+extension Environment.Read {
+    #if os(Windows)
+        /// Lossily decodes a borrowed view of platform-native (UTF-16) code units.
+        ///
+        /// - Parameter codeUnits: A borrowed view over a kernel entry's code units.
+        /// - Returns: The decoded string; malformed sequences become U+FFFD.
+        @inline(__always)
+        fileprivate static func lossyDecoded(
+            _ codeUnits: borrowing String_Primitives.String.Borrowed
+        ) -> Swift.String {
+            unsafe codeUnits.span.withUnsafeBufferPointer { buffer in
+                unsafe Swift.String.lossy(platformNative: Array(buffer))
+            }
+        }
+    #else
+        /// Lossily decodes a span of platform-native (UTF-8) code units.
+        ///
+        /// - Parameter codeUnits: A span over a kernel entry's code units.
+        /// - Returns: The decoded string; malformed sequences become U+FFFD.
+        @inline(__always)
+        fileprivate static func lossyDecoded(
+            _ codeUnits: Swift.Span<String_Primitives.String.Char>
+        ) -> Swift.String {
+            unsafe codeUnits.withUnsafeBufferPointer { buffer in
+                unsafe Swift.String.lossy(platformNative: Array(buffer))
+            }
+        }
+    #endif
 }

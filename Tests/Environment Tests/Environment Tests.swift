@@ -50,7 +50,13 @@ extension Environment {
         @Test
         func `Read all environment variables`() {
             let all = Environment.read.all()
-            #expect(all["PATH"] != nil)
+            // `all()` keys the dictionary with the name exactly as the OS
+            // environment block spells it, and Swift dictionary lookup is
+            // case-sensitive — Windows conventionally spells the search path
+            // `Path`, POSIX `PATH`. Compare case-insensitively so the
+            // assertion states the portable fact. (``callAsFunction(_:)`` is
+            // unaffected: `GetEnvironmentVariableW` matches case-insensitively.)
+            #expect(all.contains { $0.key.uppercased() == "PATH" })
             #expect(all.count > 0)
         }
 

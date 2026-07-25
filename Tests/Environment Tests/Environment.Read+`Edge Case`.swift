@@ -9,51 +9,63 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Environment
-import Testing
+// POSIX-only suite. The invariant under test is a property of the POSIX
+// environment block specifically — `environ` is an array of NUL-terminated
+// *byte* strings, so it can hold sequences that are not valid UTF-8, and the
+// test injects one through raw `setenv`. Windows has no counterpart here: its
+// environment block is UTF-16 (`GetEnvironmentStringsW`) and it has no
+// `setenv`, so the file has nothing to compile against there. The lossy-decode
+// policy `all()` implements is platform-neutral; only this injection mechanism
+// is not.
+#if !os(Windows)
 
-#if canImport(Darwin)
-    import Darwin
-#elseif canImport(Glibc)
-    import Glibc
-#elseif canImport(Musl)
-    import Musl
-#endif
+    import Environment
+    import Testing
 
-extension Environment.Read {
-    @Suite
-    struct `Edge Case` {
-        /// F-001: `all()` used to force-try UTF-8 decoding of every environment
-        /// entry (`try! String(entry.name)` / `try! String(entry.value)`), which
-        /// traps the whole process the instant any environment variable holds a
-        /// byte sequence that is not valid UTF-8 — a state POSIX explicitly
-        /// permits (`environ` is a NUL-terminated byte string, not a validated
-        /// UTF-8 string). This test injects a real, malformed environment
-        /// variable via raw `setenv` (bypassing `Swift.String` construction
-        /// entirely, since a `String` literal cannot itself hold invalid UTF-8)
-        /// and asserts `all()` returns lossily-decoded U+FFFD replacement text
-        /// instead of trapping.
-        @Test
-        func `all decodes a non-UTF8 environment value losslessly instead of trapping`() {
-            let name = "__SWIFT_ENVIRONMENT_F001_INVALID_UTF8__"
+    #if canImport(Darwin)
+        import Darwin
+    #elseif canImport(Glibc)
+        import Glibc
+    #elseif canImport(Musl)
+        import Musl
+    #endif
 
-            // "val" followed by a lone 0xFF byte (never valid in UTF-8, in any
-            // position) followed by the C-string NUL terminator.
-            let rawValue: [UInt8] = [0x76, 0x61, 0x6C, 0xFF, 0x00]
+    extension Environment.Read {
+        @Suite
+        struct `Edge Case` {
+            /// F-001: `all()` used to force-try UTF-8 decoding of every environment
+            /// entry (`try! String(entry.name)` / `try! String(entry.value)`), which
+            /// traps the whole process the instant any environment variable holds a
+            /// byte sequence that is not valid UTF-8 — a state POSIX explicitly
+            /// permits (`environ` is a NUL-terminated byte string, not a validated
+            /// UTF-8 string). This test injects a real, malformed environment
+            /// variable via raw `setenv` (bypassing `Swift.String` construction
+            /// entirely, since a `String` literal cannot itself hold invalid UTF-8)
+            /// and asserts `all()` returns lossily-decoded U+FFFD replacement text
+            /// instead of trapping.
+            @Test
+            func `all decodes a non-UTF8 environment value losslessly instead of trapping`() {
+                let name = "__SWIFT_ENVIRONMENT_F001_INVALID_UTF8__"
 
-            rawValue.withUnsafeBufferPointer { buffer in
-                buffer.baseAddress!.withMemoryRebound(
-                    to: CChar.self,
-                    capacity: buffer.count
-                ) { cString in
-                    _ = setenv(name, cString, 1)
+                // "val" followed by a lone 0xFF byte (never valid in UTF-8, in any
+                // position) followed by the C-string NUL terminator.
+                let rawValue: [UInt8] = [0x76, 0x61, 0x6C, 0xFF, 0x00]
+
+                rawValue.withUnsafeBufferPointer { buffer in
+                    buffer.baseAddress!.withMemoryRebound(
+                        to: CChar.self,
+                        capacity: buffer.count
+                    ) { cString in
+                        _ = setenv(name, cString, 1)
+                    }
                 }
+                defer { _ = unsetenv(name) }
+
+                let all = Environment.read.all()
+
+                #expect(all[name] == "val\u{FFFD}")
             }
-            defer { _ = unsetenv(name) }
-
-            let all = Environment.read.all()
-
-            #expect(all[name] == "val\u{FFFD}")
         }
     }
-}
+
+#endif  // !os(Windows)
