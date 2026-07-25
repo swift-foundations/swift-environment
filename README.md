@@ -72,6 +72,39 @@ Requires Swift 6.3.1 and macOS 26 / iOS 26 / tvOS 26 / watchOS 26 / visionOS 26.
 
 ---
 
+## Error Handling
+
+Parsing a dotenv document throws a typed `Environment.Dotenv.Error`; every case
+carries the 1-based physical line it was detected on:
+
+```
+Environment.Dotenv.Error
+├── .invalidKey(line:)          // key is empty or begins with a non-key byte
+├── .missingSeparator(line:)    // a key line has no `=` (or trailing garbage)
+├── .unterminatedQuote(line:)   // an opened quote never closed before EOF
+└── .invalidEscape(line:)       // `\` in a double-quoted value followed by an
+                                //   unsupported byte
+```
+
+```swift
+do {
+    let dotenv = try Environment.Dotenv(parsing: text)
+    _ = dotenv
+} catch .invalidKey(let line) {
+    _ = line
+} catch .missingSeparator(let line) {
+    _ = line
+} catch .unterminatedQuote(let line) {
+    _ = line
+} catch .invalidEscape(let line) {
+    _ = line
+}
+```
+
+Process-environment reads surface a separate typed `Kernel.Environment.Error`.
+
+---
+
 ## Community
 
 <!-- BEGIN: discussion -->
