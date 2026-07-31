@@ -9,7 +9,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
-internal import Kernel
+public import Environment_Core
+public import Kernel
 internal import Synchronization
 
 extension Environment {

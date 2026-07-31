@@ -9,7 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
-import Environment
+import Environment_Core
 import Testing
 
 extension Environment.Dotenv {

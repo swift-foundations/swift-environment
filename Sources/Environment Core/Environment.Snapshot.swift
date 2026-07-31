@@ -36,16 +36,6 @@ extension Environment.Snapshot {
     public init(_ values: [Swift.String: Swift.String]) {
         self.values = values
     }
-
-    /// Returns a snapshot of the current process environment.
-    public static func current() -> Self {
-        Self(Environment.read.all())
-    }
-
-    /// Returns a snapshot of the effective environment (process + TaskLocal overlay).
-    public static func effective() -> Self {
-        Environment.task.effective()
-    }
 }
 
 // MARK: - Subscript

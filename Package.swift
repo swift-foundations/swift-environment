@@ -23,6 +23,14 @@ let package = Package(
         .visionOS(.v26)
     ],
     products: [
+        // The environment value vocabulary — `Environment.Snapshot`, `Environment.Dotenv`.
+        // No package dependencies, no platform engine, no foreign `String`. Depend on
+        // this when you carry, merge, or parse environment values.
+        .library(name: "Environment Core", targets: ["Environment Core"]),
+
+        // The value vocabulary plus access to the real process environment —
+        // `Environment.read`, `Environment.write`, `Environment.task`,
+        // `Snapshot.current()`. Binds to `Kernel`, and therefore to a platform engine.
         .library(name: "Environment", targets: ["Environment"])
     ],
     dependencies: [
@@ -31,12 +39,24 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "Environment Core",
+            dependencies: [],
+            path: "Sources/Environment Core"
+        ),
+        .target(
             name: "Environment",
             dependencies: [
+                "Environment Core",
                 .product(name: "Kernel", package: "swift-kernel"),
                 .product(name: "Strings", package: "swift-strings")
             ],
             path: "Sources/Environment"
+        ),
+        .testTarget(
+            name: "Environment Core Tests",
+            dependencies: [
+                "Environment Core",
+            ]
         ),
         .testTarget(
             name: "Environment Tests",

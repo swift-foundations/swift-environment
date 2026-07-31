@@ -9,6 +9,7 @@
 //
 // ===----------------------------------------------------------------------===//
 
+public import Environment_Core
 internal import Kernel
 internal import Strings
 internal import Synchronization

@@ -9,6 +9,8 @@
 //
 // ===----------------------------------------------------------------------===//
 
+public import Environment_Core
+
 extension Environment {
     /// TaskLocal storage for environment overlay.
     @TaskLocal
