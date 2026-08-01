@@ -107,7 +107,7 @@ extension Environment.Dotenv {
         var rawIndex = 0
         while rawIndex < rawBytes.count {
             let byte = rawBytes[rawIndex]
-            if byte == asciiCarriageReturn, rawIndex + 1 < rawBytes.count, rawBytes[rawIndex + 1] == asciiNewline {
+            if byte == asciiCarriageReturn, rawIndex + 1 < rawBytes.endIndex, rawBytes[rawIndex + 1] == asciiNewline {
                 rawIndex += 1
                 continue
             }
@@ -153,9 +153,7 @@ extension Environment.Dotenv {
         func consumeExportPrefixIfPresent() {
             let word: [Swift.UInt8] = [0x65, 0x78, 0x70, 0x6F, 0x72, 0x74]  // "export"
             guard index + word.count < count else { return }
-            for offset in 0..<word.count where bytes[index + offset] != word[offset] {
-                return
-            }
+            guard word.indices.allSatisfy({ bytes[index + $0] == word[$0] }) else { return }
             guard isSpaceOrTab(bytes[index + word.count]) else { return }
             index += word.count
             skipSpacesAndTabs()

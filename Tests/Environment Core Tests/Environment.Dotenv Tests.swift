@@ -118,13 +118,11 @@ extension Environment.Dotenv {
 
         @Test
         func `Invalid key throws invalidKey with the offending line`() {
-            do {
+            do throws(Environment.Dotenv.Error) {
                 _ = try Environment.Dotenv(parsing: "1FOO=bar\n")
                 Issue.record("Expected Environment.Dotenv.Error.invalidKey")
-            } catch let error as Environment.Dotenv.Error {
-                #expect(error == .invalidKey(line: 1))
             } catch {
-                Issue.record("Unexpected error: \(error)")
+                #expect(error == .invalidKey(line: 1))
             }
         }
 
@@ -151,13 +149,11 @@ extension Environment.Dotenv {
 
         @Test
         func `A leading hyphen still throws invalidKey`() {
-            do {
+            do throws(Environment.Dotenv.Error) {
                 _ = try Environment.Dotenv(parsing: "-FOO=bar\n")
                 Issue.record("Expected Environment.Dotenv.Error.invalidKey")
-            } catch let error as Environment.Dotenv.Error {
-                #expect(error == .invalidKey(line: 1))
             } catch {
-                Issue.record("Unexpected error: \(error)")
+                #expect(error == .invalidKey(line: 1))
             }
         }
 
@@ -165,73 +161,61 @@ extension Environment.Dotenv {
         func `A truly malformed line still aborts the parse despite hyphen support`() {
             // Retention case: admitting interior hyphens must not loosen the parser
             // into accepting arbitrary punctuation — the loader stays strict.
-            do {
+            do throws(Environment.Dotenv.Error) {
                 _ = try Environment.Dotenv(parsing: "FOO!BAR=baz\n")
                 Issue.record("Expected Environment.Dotenv.Error.missingSeparator")
-            } catch let error as Environment.Dotenv.Error {
-                #expect(error == .missingSeparator(line: 1))
             } catch {
-                Issue.record("Unexpected error: \(error)")
+                #expect(error == .missingSeparator(line: 1))
             }
         }
 
         @Test
         func `Missing separator throws missingSeparator with the offending line`() {
-            do {
+            do throws(Environment.Dotenv.Error) {
                 _ = try Environment.Dotenv(parsing: "FOO bar\n")
                 Issue.record("Expected Environment.Dotenv.Error.missingSeparator")
-            } catch let error as Environment.Dotenv.Error {
-                #expect(error == .missingSeparator(line: 1))
             } catch {
-                Issue.record("Unexpected error: \(error)")
+                #expect(error == .missingSeparator(line: 1))
             }
         }
 
         @Test
         func `Trailing content after a closing quote throws missingSeparator`() {
-            do {
+            do throws(Environment.Dotenv.Error) {
                 _ = try Environment.Dotenv(parsing: "FOO=\"bar\" garbage\n")
                 Issue.record("Expected Environment.Dotenv.Error.missingSeparator")
-            } catch let error as Environment.Dotenv.Error {
-                #expect(error == .missingSeparator(line: 1))
             } catch {
-                Issue.record("Unexpected error: \(error)")
+                #expect(error == .missingSeparator(line: 1))
             }
         }
 
         @Test
         func `Unterminated double quote throws unterminatedQuote with the opening line`() {
-            do {
+            do throws(Environment.Dotenv.Error) {
                 _ = try Environment.Dotenv(parsing: "FOO=\"bar\n")
                 Issue.record("Expected Environment.Dotenv.Error.unterminatedQuote")
-            } catch let error as Environment.Dotenv.Error {
-                #expect(error == .unterminatedQuote(line: 1))
             } catch {
-                Issue.record("Unexpected error: \(error)")
+                #expect(error == .unterminatedQuote(line: 1))
             }
         }
 
         @Test
         func `Unterminated single quote throws unterminatedQuote with the opening line`() {
-            do {
+            do throws(Environment.Dotenv.Error) {
                 _ = try Environment.Dotenv(parsing: "FOO='bar\n")
                 Issue.record("Expected Environment.Dotenv.Error.unterminatedQuote")
-            } catch let error as Environment.Dotenv.Error {
-                #expect(error == .unterminatedQuote(line: 1))
             } catch {
-                Issue.record("Unexpected error: \(error)")
+                #expect(error == .unterminatedQuote(line: 1))
             }
         }
 
         @Test
         func `Invalid escape sequence throws invalidEscape with the offending line`() {
-            do {
+            do throws(Environment.Dotenv.Error) {
                 _ = try Environment.Dotenv(parsing: "FOO=\"bar\\zbaz\"\n")
                 Issue.record("Expected Environment.Dotenv.Error.invalidEscape")
-            } catch let error as Environment.Dotenv.Error {
-                #expect(error == .invalidEscape(line: 1))
             } catch {
-                Issue.record("Unexpected error: \(error)")
+                #expect(error == .invalidEscape(line: 1))
             }
         }
 

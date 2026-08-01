@@ -10,6 +10,7 @@
 // ===----------------------------------------------------------------------===//
 
 import Environment
+import Kernel
 import Testing
 
 extension Environment {
@@ -33,7 +34,9 @@ extension Environment {
             let testValue = "test_value_123"
 
             // Clean up first
-            try? Environment.write.unset(testName)
+            do throws(Kernel.Environment.Error) {
+                try Environment.write.unset(testName)
+            } catch {}
 
             // Set the variable
             try Environment.write(testName, to: testValue)
@@ -84,7 +87,9 @@ extension Environment {
             let testName = "__TEST_OVERLAY_VAR__"
 
             // Ensure variable is not set in process
-            try? Environment.write.unset(testName)
+            do throws(Kernel.Environment.Error) {
+                try Environment.write.unset(testName)
+            } catch {}
             #expect(Environment.read(testName) == nil)
 
             // Use overlay
