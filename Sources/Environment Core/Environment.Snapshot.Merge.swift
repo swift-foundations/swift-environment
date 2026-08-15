@@ -34,7 +34,9 @@ extension Environment.Snapshot.Merge {
     ///
     /// - Parameter modifications: Keys map to new values. Nil values remove the variable.
     /// - Returns: A new snapshot with the modifications applied.
-    public func callAsFunction(_ modifications: [Swift.String: Swift.String?]) -> Environment.Snapshot {
+    public func callAsFunction(
+        _ modifications: [Swift.String: Swift.String?]
+    ) -> Environment.Snapshot {
         var result = snapshot
         for (key, value) in modifications {
             if let value {

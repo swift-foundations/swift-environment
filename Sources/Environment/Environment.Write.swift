@@ -36,7 +36,10 @@ extension Environment.Write {
     ///   - name: The name of the environment variable.
     ///   - value: The value to set.
     /// - Throws: `Kernel.Environment.Error` on failure.
-    public func callAsFunction(_ name: Swift.String, to value: Swift.String) throws(Kernel.Environment.Error) {
+    public func callAsFunction(
+        _ name: Swift.String,
+        to value: Swift.String
+    ) throws(Kernel.Environment.Error) {
         try set(name, to: value, overwrite: true)
     }
 
@@ -47,7 +50,11 @@ extension Environment.Write {
     ///   - value: The value to set.
     ///   - overwrite: If true, overwrite existing value. If false and variable exists, no-op.
     /// - Throws: `Kernel.Environment.Error` on failure.
-    public func set(_ name: Swift.String, to value: Swift.String, overwrite: Bool) throws(Kernel.Environment.Error) {
+    public func set(
+        _ name: Swift.String,
+        to value: Swift.String,
+        overwrite: Bool
+    ) throws(Kernel.Environment.Error) {
         try Environment.lock.withLock { _ throws(Kernel.Environment.Error) in
             unsafe try Kernel.Environment.set(name, to: value, overwrite: overwrite)
         }

@@ -107,7 +107,9 @@ extension Environment.Dotenv {
         var rawIndex = 0
         while rawIndex < rawBytes.count {
             let byte = rawBytes[rawIndex]
-            if byte == asciiCarriageReturn, rawIndex + 1 < rawBytes.endIndex, rawBytes[rawIndex + 1] == asciiNewline {
+            if byte == asciiCarriageReturn, rawIndex + 1 < rawBytes.endIndex,
+                rawBytes[rawIndex + 1] == asciiNewline
+            {
                 rawIndex += 1
                 continue
             }
