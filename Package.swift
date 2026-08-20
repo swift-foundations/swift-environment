@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3.3
+// swift-tools-version: 6.4
 
 // ===----------------------------------------------------------------------===//
 //
@@ -16,11 +16,11 @@ import PackageDescription
 let package = Package(
     name: "swift-environment",
     platforms: [
-        .macOS("27"),
-        .iOS("27"),
-        .tvOS("27"),
-        .watchOS("27"),
-        .visionOS("27")
+        .macOS(.v27),
+        .iOS(.v27),
+        .tvOS(.v27),
+        .watchOS(.v27),
+        .visionOS(.v27),
     ],
     products: [
         // The environment value vocabulary — `Environment.Snapshot`, `Environment.Dotenv`.
@@ -31,11 +31,11 @@ let package = Package(
         // The value vocabulary plus access to the real process environment —
         // `Environment.read`, `Environment.write`, `Environment.task`,
         // `Snapshot.current()`. Binds to `Kernel`, and therefore to a platform engine.
-        .library(name: "Environment", targets: ["Environment"])
+        .library(name: "Environment", targets: ["Environment"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swift-foundations/swift-kernel.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-strings.git", branch: "main")
+        .package(url: "https://github.com/swift-foundations/swift-strings.git", branch: "main"),
     ],
     targets: [
         .target(
@@ -48,25 +48,24 @@ let package = Package(
             dependencies: [
                 "Environment Core",
                 .product(name: "Kernel", package: "swift-kernel"),
-                .product(name: "Strings", package: "swift-strings")
+                .product(name: "Strings", package: "swift-strings"),
             ],
             path: "Sources/Environment"
         ),
         .testTarget(
             name: "Environment Core Tests",
             dependencies: [
-                "Environment Core",
+                "Environment Core"
             ]
         ),
         .testTarget(
             name: "Environment Tests",
             dependencies: [
-                "Environment",
+                "Environment"
             ]
         ),
     ]
 )
-
 
 for target in package.targets where ![.system, .binary, .plugin, .macro].contains(target.type) {
     let ecosystem: [SwiftSetting] = [
