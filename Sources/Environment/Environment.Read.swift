@@ -118,7 +118,7 @@ extension Environment.Read {
         fileprivate static func lossyDecoded(
             _ codeUnits: Swift.Span<String_Primitives.String.Char>
         ) -> Swift.String {
-            unsafe codeUnits.withUnsafeBufferPointer { buffer in
+            codeUnits.withUnsafeBufferPointer { buffer in
                 unsafe Swift.String.lossy(platformNative: Array(buffer))
             }
         }
