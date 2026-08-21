@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-environment open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-environment project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Environment
 import Kernel
 import Testing
@@ -33,19 +22,15 @@ extension Environment {
             let testName = "__TEST_ENV_VAR__"
             let testValue = "test_value_123"
 
-            // Clean up first
             do throws(Kernel.Environment.Error) {
                 try Environment.write.unset(testName)
             } catch {}
 
-            // Set the variable
             try Environment.write(testName, to: testValue)
 
-            // Read it back
             let readValue = Environment.read(testName)
             #expect(readValue == testValue)
 
-            // Clean up
             try Environment.write.unset(testName)
             #expect(Environment.read(testName) == nil)
         }
@@ -53,12 +38,7 @@ extension Environment {
         @Test
         func `Read all environment variables`() {
             let all = Environment.read.all()
-            // `all()` keys the dictionary with the name exactly as the OS
-            // environment block spells it, and Swift dictionary lookup is
-            // case-sensitive — Windows conventionally spells the search path
-            // `Path`, POSIX `PATH`. Compare case-insensitively so the
-            // assertion states the portable fact. (``callAsFunction(_:)`` is
-            // unaffected: `GetEnvironmentVariableW` matches case-insensitively.)
+
             #expect(all.contains { $0.key.uppercased() == "PATH" })
             #expect(all.count > 0)
         }
@@ -86,22 +66,18 @@ extension Environment {
         func `TaskLocal overlay`() async throws {
             let testName = "__TEST_OVERLAY_VAR__"
 
-            // Ensure variable is not set in process
             do throws(Kernel.Environment.Error) {
                 try Environment.write.unset(testName)
             } catch {}
             #expect(Environment.read(testName) == nil)
 
-            // Use overlay
             try await Environment.withOverlay([testName: "overlay_value"]) {
-                // Task-local read sees overlay
+
                 #expect(Environment.task.read(testName) == "overlay_value")
 
-                // Process read still sees nil
                 #expect(Environment.read(testName) == nil)
             }
 
-            // Outside overlay, task read also sees nil
             #expect(Environment.task.read(testName) == nil)
         }
     }

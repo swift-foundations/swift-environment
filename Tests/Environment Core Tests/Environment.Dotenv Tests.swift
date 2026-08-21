@@ -1,14 +1,3 @@
-// ===----------------------------------------------------------------------===//
-//
-// This source file is part of the swift-environment open source project
-//
-// Copyright (c) 2024-2025 Coen ten Thije Boonkkamp and the swift-environment project authors
-// Licensed under Apache License v2.0
-//
-// See LICENSE for license information
-//
-// ===----------------------------------------------------------------------===//
-
 import Environment_Core
 import Testing
 
@@ -128,9 +117,7 @@ extension Environment.Dotenv {
 
         @Test
         func `Key admits interior hyphens`() throws {
-            // Real-world externally-imposed keys this grammar must accept —
-            // notably Apple's literal `apple-developer-merchantid-domain-association`
-            // naming (uppercased here per this project's env-var convention).
+
             let dotenv = try Environment.Dotenv(
                 parsing: """
                     LOCAL-SSL-SERVER-CRT=cert_content
@@ -159,8 +146,7 @@ extension Environment.Dotenv {
 
         @Test
         func `A truly malformed line still aborts the parse despite hyphen support`() {
-            // Retention case: admitting interior hyphens must not loosen the parser
-            // into accepting arbitrary punctuation — the loader stays strict.
+
             do throws(Environment.Dotenv.Error) {
                 _ = try Environment.Dotenv(parsing: "FOO!BAR=baz\n")
                 Issue.record("Expected Environment.Dotenv.Error.missingSeparator")
