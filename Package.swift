@@ -18,8 +18,8 @@ let package = Package(
         .library(name: "Environment", targets: ["Environment"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-foundations/swift-kernel.git", branch: "main"),
-        .package(url: "https://github.com/swift-foundations/swift-strings.git", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-kernel.git", branch: "main"),
+        .package(url: "https://github.com/swift-compositions/swift-strings.git", branch: "main"),
     ],
     targets: [
         .target(

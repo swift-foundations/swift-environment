@@ -2,7 +2,7 @@
 # Triaged by AI-assisted bulk pass (2026-04-29).
 description: "Thread-safe process environment variable access with task-local overlays for Swift."
 topics:
-  - foundations
+  - compositions
   - environment
 homepage: "https://swift-institute.org"
 readme:

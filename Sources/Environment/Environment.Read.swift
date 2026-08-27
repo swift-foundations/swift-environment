@@ -56,7 +56,7 @@ extension Environment.Read {
 
         @inline(__always)
         fileprivate static func lossyDecoded(
-            _ codeUnits: borrowing String_Primitives.String.Borrowed
+            _ codeUnits: borrowing String.String.Borrowed
         ) -> Swift.String {
             unsafe codeUnits.span.withUnsafeBufferPointer { buffer in
                 unsafe Swift.String.lossy(platformNative: Array(buffer))
@@ -66,7 +66,7 @@ extension Environment.Read {
 
         @inline(__always)
         fileprivate static func lossyDecoded(
-            _ codeUnits: Swift.Span<String_Primitives.String.Char>
+            _ codeUnits: Swift.Span<String.String.Char>
         ) -> Swift.String {
             codeUnits.withUnsafeBufferPointer { buffer in
                 unsafe Swift.String.lossy(platformNative: Array(buffer))
